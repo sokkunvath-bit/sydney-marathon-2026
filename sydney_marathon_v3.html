@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sydney Marathon 2026</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0f0f0d;
+  --surface: #181815;
+  --card: #1e1e1a;
+  --border: #2a2a25;
+  --border-light: #323230;
+  --text: #e8e6e0;
+  --text-2: #9a9890;
+  --text-3: #5a5855;
+  --accent: #c8f045;
+  --accent-dim: #8aaa1e;
+  --easy: #3dd68c;
+  --easy-bg: #0e2a1c;
+  --speed: #a78bfa;
+  --speed-bg: #1a1030;
+  --long: #38bdf8;
+  --long-bg: #0a1f2e;
+  --strength: #fb923c;
+  --strength-bg: #2a1508;
+  --upper: #f472b6;
+  --upper-bg: #2a0e1c;
+  --rest: #6b7280;
+  --rest-bg: #1a1c1e;
+  --race: #f87171;
+  --race-bg: #2a0e0e;
+  --split-run: #3dd68c;
+  --split-str: #fb923c;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding:0}
+
+/* ── HEADER ── */
+.app-header{background:var(--surface);border-bottom:1px solid var(--border);padding:1.5rem 2rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap}
+.header-left h1{font-family:'Syne',sans-serif;font-size:22px;font-weight:800;letter-spacing:-0.5px;color:var(--text)}
+.header-left h1 span{color:var(--accent)}
+.header-sub{font-size:12px;color:var(--text-2);margin-top:3px;font-family:'DM Mono',monospace}
+.race-countdown{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:10px 16px;text-align:center}
+.countdown-num{font-family:'DM Mono',monospace;font-size:24px;font-weight:500;color:var(--accent);line-height:1}
+.countdown-lbl{font-size:10px;color:var(--text-3);text-transform:uppercase;letter-spacing:.08em;margin-top:3px}
+
+/* ── LAYOUT ── */
+.app-body{display:grid;grid-template-columns:220px 1fr;min-height:calc(100vh - 76px)}
+
+/* ── SIDEBAR ── */
+.sidebar{background:var(--surface);border-right:1px solid var(--border);padding:1rem 0;overflow-y:auto;max-height:calc(100vh - 76px);position:sticky;top:0}
+.sidebar-section{padding:8px 16px 4px;font-size:10px;color:var(--text-3);text-transform:uppercase;letter-spacing:.1em;font-family:'DM Mono',monospace}
+.phase-group{margin-bottom:4px}
+.phase-label{padding:6px 16px 4px;font-size:10px;font-weight:600;letter-spacing:.06em}
+.week-btn{width:100%;text-align:left;background:none;border:none;padding:5px 16px 5px 20px;font-family:'DM Sans',sans-serif;font-size:12px;color:var(--text-2);cursor:pointer;display:flex;align-items:center;gap:8px;border-left:2px solid transparent;transition:all .15s}
+.week-btn:hover{background:rgba(200,240,69,.05);color:var(--text)}
+.week-btn.active{background:rgba(200,240,69,.08);color:var(--accent);border-left-color:var(--accent);font-weight:500}
+.week-btn .wnum{font-family:'DM Mono',monospace;font-size:11px;opacity:.6;min-width:20px}
+.week-btn .wkm{font-family:'DM Mono',monospace;font-size:10px;margin-left:auto;opacity:.5}
+
+/* ── MAIN ── */
+.main{padding:1.5rem 2rem;overflow-y:auto;max-height:calc(100vh - 76px)}
+
+/* ── WEEK HEADER ── */
+.week-header{margin-bottom:1.25rem}
+.week-title{font-family:'Syne',sans-serif;font-size:26px;font-weight:700;color:var(--text);line-height:1.1}
+.week-title .wn{color:var(--accent);font-size:18px;font-weight:600}
+.week-focus{font-size:13px;color:var(--text-2);margin-top:6px}
+.phase-pill{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;margin-top:8px;font-family:'DM Mono',monospace}
+
+/* ── META GRID ── */
+.meta-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:1.25rem}
+.meta-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px 14px}
+.meta-lbl{font-size:10px;color:var(--text-3);text-transform:uppercase;letter-spacing:.08em;font-family:'DM Mono',monospace;margin-bottom:4px}
+.meta-val{font-size:20px;font-weight:600;font-family:'DM Mono',monospace;color:var(--text);line-height:1}
+.meta-sub{font-size:11px;color:var(--text-2);margin-top:3px}
+
+/* ── PROGRESS ── */
+.prog-wrap{margin-bottom:1.25rem}
+.prog-top{display:flex;justify-content:space-between;font-size:12px;color:var(--text-2);margin-bottom:6px;font-family:'DM Mono',monospace}
+.prog-bg{height:4px;background:var(--border);border-radius:2px}
+.prog-fill{height:4px;border-radius:2px;background:var(--accent);transition:width .4s cubic-bezier(.4,0,.2,1)}
+
+/* ── DAY CARDS ── */
+.days-grid{display:flex;flex-direction:column;gap:8px}
+.day-card{background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden;transition:border-color .15s,opacity .2s}
+.day-card.drag-over{border-color:var(--accent);background:#1a1e10}
+.day-card.is-done{opacity:.55}
+.day-header{display:flex;align-items:center;gap:10px;padding:11px 14px;cursor:pointer;user-select:none;transition:background .12s}
+.day-header:hover{background:rgba(255,255,255,.02)}
+.drag-handle{cursor:grab;color:var(--text-3);font-size:16px;flex-shrink:0;line-height:1;transition:color .15s}
+.drag-handle:hover{color:var(--text-2)}
+.drag-handle:active{cursor:grabbing}
+.day-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.day-date{font-size:11px;color:var(--text-3);min-width:96px;font-family:'DM Mono',monospace}
+.day-title{font-size:13px;font-weight:500;flex:1;color:var(--text)}
+.day-badge{font-size:10px;padding:2px 8px;border-radius:6px;font-weight:600;flex-shrink:0;font-family:'DM Mono',monospace;letter-spacing:.03em}
+.km-wrap{display:flex;align-items:center;gap:4px;flex-shrink:0}
+.km-val{font-size:12px;color:var(--text-3);font-family:'DM Mono',monospace}
+.km-actual{font-size:12px;color:var(--easy);font-weight:600;font-family:'DM Mono',monospace}
+.edit-btn{background:none;border:none;cursor:pointer;font-size:11px;color:var(--text-3);padding:1px 3px;border-radius:4px;transition:color .12s}
+.edit-btn:hover{color:var(--accent)}
+.km-input{width:54px;font-size:12px;padding:2px 6px;border:1px solid var(--accent);border-radius:4px;outline:none;background:var(--surface);color:var(--text);font-family:'DM Mono',monospace}
+.day-chev{font-size:10px;color:var(--text-3);transition:transform .2s;flex-shrink:0}
+
+/* ── DAY BODY ── */
+.day-body{display:none;border-top:1px solid var(--border)}
+.day-body.open{display:block}
+
+/* ── SUB SECTIONS (for split days) ── */
+.sub-section{border-bottom:1px solid var(--border)}
+.sub-section:last-child{border-bottom:none}
+.sub-header{display:flex;align-items:center;gap:8px;padding:8px 14px 4px;background:rgba(255,255,255,.02)}
+.sub-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.sub-title{font-size:12px;font-weight:600;color:var(--text-2);flex:1}
+.sub-badge{font-size:10px;padding:2px 7px;border-radius:5px;font-weight:600;font-family:'DM Mono',monospace}
+
+/* ── SUPERSET BLOCKS ── */
+.superset-wrap{padding:8px 14px}
+.superset-pair{margin-bottom:10px;border:1px solid var(--border-light);border-radius:8px;overflow:hidden}
+.superset-pair:last-child{margin-bottom:0}
+.ss-label{font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:5px 10px;background:rgba(255,255,255,.03);color:var(--text-3);font-family:'DM Mono',monospace;border-bottom:1px solid var(--border)}
+.ss-exercises{display:flex;flex-direction:column;gap:0}
+.ss-exercise{padding:7px 10px;border-bottom:1px dashed var(--border)}
+.ss-exercise:last-child{border-bottom:none}
+.ss-ex-name{font-size:12px;font-weight:600;color:var(--text);margin-bottom:3px}
+.ss-ex-meta{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:3px}
+.ss-tag{font-size:10px;padding:1px 6px;border-radius:4px;font-family:'DM Mono',monospace}
+.ss-note{font-size:11px;color:var(--text-2);line-height:1.4;margin-top:3px}
+.ss-rest{display:flex;align-items:center;gap:6px;padding:5px 10px;background:rgba(200,240,69,.04);font-size:11px;color:var(--accent-dim);font-family:'DM Mono',monospace;border-top:1px solid var(--border)}
+
+/* ── SESSION BLOCKS (for runs) ── */
+.session-block{padding:8px 14px;border-bottom:1px solid var(--border)}
+.session-block:last-of-type{border-bottom:none}
+.block-label{font-size:10px;font-weight:600;letter-spacing:.06em;color:var(--text-3);margin-bottom:5px;text-transform:uppercase;font-family:'DM Mono',monospace}
+.block-row{display:flex;align-items:baseline;gap:6px;margin-bottom:3px;font-size:12px;line-height:1.5;color:var(--text-2)}
+.block-icon{width:14px;flex-shrink:0;color:var(--text-3)}
+.block-pace{font-weight:600;color:var(--text);font-family:'DM Mono',monospace;font-size:11px}
+.block-hr{font-size:11px;color:var(--text-3);margin-left:2px}
+
+/* ── TIP BOX ── */
+.tip-box{margin:8px 14px 10px;border-left:2px solid var(--accent);padding:7px 10px;background:rgba(200,240,69,.05);font-size:12px;color:var(--text-2);line-height:1.6;border-radius:0 6px 6px 0}
+.tip-box strong{color:var(--accent)}
+
+/* ── STATUS BAR ── */
+.status-bar{display:flex;align-items:center;gap:6px;padding:8px 14px;border-top:1px solid var(--border);background:rgba(255,255,255,.015);flex-wrap:wrap}
+.slabel{font-size:11px;color:var(--text-3);font-family:'DM Mono',monospace}
+.sbtn{font-size:11px;padding:4px 11px;border-radius:6px;cursor:pointer;border:1px solid var(--border-light);background:none;color:var(--text-3);font-family:'DM Sans',sans-serif;transition:all .12s}
+.sbtn:hover{border-color:var(--text-2);color:var(--text)}
+.sbtn.s-done{background:var(--easy-bg);color:var(--easy);border-color:var(--easy);font-weight:600}
+.sbtn.s-skipped{background:var(--race-bg);color:var(--race);border-color:var(--race);font-weight:600}
+.sbtn.s-planned{background:rgba(200,240,69,.1);color:var(--accent);border-color:var(--accent);font-weight:600}
+
+/* ── DRAG HINT ── */
+.drag-hint{font-size:11px;color:var(--text-3);text-align:center;margin-top:1rem;font-family:'DM Mono',monospace}
+
+/* ── BADGE TYPES ── */
+.b-easy{background:var(--easy-bg);color:var(--easy)}
+.b-speed{background:var(--speed-bg);color:var(--speed)}
+.b-long{background:var(--long-bg);color:var(--long)}
+.b-rest{background:var(--rest-bg);color:var(--rest)}
+.b-strength{background:var(--strength-bg);color:var(--strength)}
+.b-upper{background:var(--upper-bg);color:var(--upper)}
+.b-race{background:var(--race-bg);color:var(--race)}
+.b-split{background:var(--strength-bg);color:var(--strength)}
+.b-legs{background:var(--strength-bg);color:var(--strength)}
+.d-easy{background:var(--easy)}.d-speed{background:var(--speed)}.d-long{background:var(--long)}
+.d-rest{background:var(--rest)}.d-strength{background:var(--strength)}.d-upper{background:var(--upper)}
+.d-race{background:var(--race)}.d-split{background:var(--strength)}.d-legs{background:var(--strength)}
+
+.ss-sets{background:rgba(200,240,69,.1);color:var(--accent)}
+.ss-reps{background:rgba(56,189,248,.1);color:var(--long)}
+.ss-rest-tag{background:rgba(251,146,60,.1);color:var(--strength)}
+
+@media(max-width:900px){
+  .app-body{grid-template-columns:1fr}
+  .sidebar{display:none}
+  .meta-grid{grid-template-columns:repeat(2,1fr)}
+}
+</style>
+</head>
+<body>
+
+<header class="app-header">
+  <div class="header-left">
+    <h1>Sydney Marathon <span>2026</span></h1>
+    <div class="header-sub">APR 6 → AUG 30 &nbsp;·&nbsp; 21 WEEKS &nbsp;·&nbsp; GOAL: SUB-3:45 &nbsp;·&nbsp; 5:19/km</div>
+  </div>
+  <div class="race-countdown">
+    <div class="countdown-num" id="daysLeft">—</div>
+    <div class="countdown-lbl">days to race</div>
+  </div>
+</header>
+
+<div class="app-body">
+  <aside class="sidebar" id="sidebar"></aside>
+  <main class="main">
+    <div class="week-header">
+      <div class="week-title"><span class="wn" id="hWeekNum">Week 1</span> <span id="hWeekDates"></span></div>
+      <div class="week-focus" id="hFocus"></div>
+      <div id="hPill"></div>
+    </div>
+    <div class="meta-grid">
+      <div class="meta-card"><div class="meta-lbl">Target KM</div><div class="meta-val" id="mKm">—</div><div class="meta-sub" id="mDone">0 km logged</div></div>
+      <div class="meta-card"><div class="meta-lbl">Sessions</div><div class="meta-val" id="mSess">—</div><div class="meta-sub" id="mSessD">0 done</div></div>
+      <div class="meta-card"><div class="meta-lbl">Long Run</div><div class="meta-val" id="mLong">—</div><div class="meta-sub" id="mLongD">—</div></div>
+      <div class="meta-card"><div class="meta-lbl">Speed</div><div class="meta-val" id="mSpd" style="font-size:13px;padding-top:4px">—</div><div class="meta-sub">Wednesday</div></div>
+    </div>
+    <div class="prog-wrap">
+      <div class="prog-top"><span>Weekly completion</span><span id="pPct">0%</span></div>
+      <div class="prog-bg"><div class="prog-fill" id="pFill" style="width:0%"></div></div>
+    </div>
+    <div class="days-grid" id="daysGrid"></div>
+    <p class="drag-hint">⠿ drag any card to swap days within this week</p>
+  </main>
+</div>
+
+<script>
+// ── STORAGE ──────────────────────────────────────────────────────────────────
+var ST={},KM={},OR={};
+try{ST=JSON.parse(localStorage.getItem('sm26_st')||'{}')}catch(e){}
+try{KM=JSON.parse(localStorage.getItem('sm26_km')||'{}')}catch(e){}
+try{OR=JSON.parse(localStorage.getItem('sm26_or')||'{}')}catch(e){}
+function save(){try{localStorage.setItem('sm26_st',JSON.stringify(ST));localStorage.setItem('sm26_km',JSON.stringify(KM));localStorage.setItem('sm26_or',JSON.stringify(OR))}catch(e){}}
+function gSt(k){return ST[k]||'planned'}
+function sSt(k,v){ST[k]=v;save()}
+function gKm(k){return KM[k]!==undefined?KM[k]:null}
+function sKm(k,v){KM[k]=v;save()}
+function gOr(wi){if(!OR[wi])OR[wi]=[0,1,2,3,4,5,6];return OR[wi].slice()}
+function sOr(wi,o){OR[wi]=o;save()}
+
+// ── PHASES ────────────────────────────────────────────────────────────────────
+var PH=[
+  {name:'Base Build',range:[1,6],color:'#3dd68c',bg:'rgba(61,214,140,.12)'},
+  {name:'Marathon Dev',range:[7,13],color:'#38bdf8',bg:'rgba(56,189,248,.12)'},
+  {name:'Race Specific',range:[14,18],color:'#a78bfa',bg:'rgba(167,139,250,.12)'},
+  {name:'Taper',range:[19,21],color:'#fb923c',bg:'rgba(251,146,60,.12)'}
+];
+function gPh(w){return PH.find(function(p){return w>=p.range[0]&&w<=p.range[1]})||PH[0]}
+
+// ── DATE ──────────────────────────────────────────────────────────────────────
+var MO=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+var DN=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+function sd(wi,si){var d=new Date('2026-04-06');d.setDate(d.getDate()+wi*7+si);return DN[si]+' '+d.getDate()+' '+MO[d.getMonth()]}
+
+// countdown
+(function(){
+  var race=new Date('2026-08-30');var now=new Date();
+  var diff=Math.ceil((race-now)/(1000*60*60*24));
+  document.getElementById('daysLeft').textContent=diff>0?diff:'🏁';
+})();
+
+// ── HELPERS ──────────────────────────────────────────────────────────────────
+function r(i,t,p,h){return{i:i,t:t,p:p,h:h}}
+function blk(l){var rows=[];for(var i=1;i<arguments.length;i++)rows.push(arguments[i]);return{l:l,rows:rows}}
+
+// superset builder
+function ss(label,exA,exB,restSec,sets){return{type:'superset',label:label,exA:exA,exB:exB,restSec:restSec,sets:sets}}
+function ex(name,reps,tempo,note){return{name:name,reps:reps,tempo:tempo,note:note}}
+// finisher (single exercise straight sets)
+function fin(name,reps,sets,note){return{type:'finisher',name:name,reps:reps,sets:sets,note:note}}
+
+// ── THURSDAY LEG SESSION ──────────────────────────────────────────────────────
+var THU_LEGS=[
+  {type:'label',text:'BLOCK 1 — POSTERIOR CHAIN'},
+  ss('Superset 1A+1B',
+    ex('Dumbbell Romanian Deadlift','10 reps','3s down, 1s up','Hold 1 DB each hand. Hinge at hips, slight knee bend, feel the hamstring stretch. Back flat throughout.'),
+    ex('Single-leg Calf Raise','15 reps each','Full range','Stand on one foot, hold DB same-side hand for balance. Full heel drop down, full rise up.'),
+    60,4),
+  ss('Superset 2A+2B',
+    ex('Single-leg Dumbbell Deadlift','8 reps each','Controlled','1 DB in opposite hand to standing leg. Hinge forward, back flat, rear leg extends behind. Hip stability focus.'),
+    ex('Dead Bug','10 reps each side','4s per rep','Opposite arm and leg extend slowly. Lower back stays pressed to floor. Breathe out on extend.'),
+    45,3),
+  ss('Superset 3A+3B',
+    ex('Dumbbell Glute Bridge','15 reps','2s squeeze at top','DB on hips. Drive through heels, squeeze glutes hard at top. Do not hyperextend the back.'),
+    ex('Copenhagen Plank','20s each side','Controlled','Side plank with top leg resting on chair/bench. Bottom leg lifts. Hips square and forward.'),
+    45,3),
+  {type:'label',text:'BLOCK 2 — QUAD & HIP'},
+  ss('Superset 4A+4B',
+    ex('Dumbbell Reverse Lunge','10 reps each','Controlled','Step back, front knee tracks over toes. Push through front heel to return. Do not push off back foot.'),
+    ex('Dumbbell Lateral Lunge','8 reps each','2s hold at bottom','Step wide to side, sit into hip, keep other leg straight. DB in goblet position at chest.'),
+    60,3),
+  fin('Dumbbell Step-up','10 reps each leg',3,'Sturdy chair or box. Drive through heel. 1s pause at top. No pushing off back foot. All power from front leg.'),
+];
+
+// ── FRIDAY UPPER BODY SESSION ─────────────────────────────────────────────────
+var FRI_UPPER=[
+  {type:'label',text:'BLOCK 1 — PUSH + PULL'},
+  ss('Superset 1A+1B · Push/Pull',
+    ex('Dumbbell Floor Press','12 reps','3s down, 1s up','Lie on floor. Elbows at 45° from body. Press straight up. Full extension at top. Floor limits shoulder overextension.'),
+    ex('Dumbbell Bent-over Row','10 reps','2s pull, 2s lower','Hinge to 45°. Pull DB to hip not chest. Squeeze shoulder blade at top. Keep back flat. Elbows close to body.'),
+    60,4),
+  ss('Superset 2A+2B · Press/Row',
+    ex('Dumbbell Overhead Press','10 reps','2s up, 2s down','Stand or sit. Start at shoulder height. Press overhead. Do not arch lower back. Brace core throughout.'),
+    ex('Single-arm Dumbbell Row','10 reps each','Controlled','Brace with hand on chair. Pull DB to hip. Elbow tracks close to body. Feel the lat engage.'),
+    60,3),
+  {type:'label',text:'BLOCK 2 — SHOULDERS + REAR DELTS'},
+  ss('Superset 3A+3B · Shoulders',
+    ex('Dumbbell Lateral Raise','12 reps','2s up, 3s down','Arms slightly bent. Raise to shoulder height only. Lead with elbows not wrists. Slow on the way down.'),
+    ex('Dumbbell Face Pull (bent over)','12 reps','2s pull, 2s release','Hinge forward. Pull DBs toward face with elbows flaring wide. Squeezes rear delts. Posture muscle.'),
+    45,3),
+  {type:'label',text:'BLOCK 3 — ARM DRIVE + ANTI-ROTATION CORE'},
+  ss('Superset 4A+4B · Arms',
+    ex('Dumbbell Bicep Curl','12 reps','Slow and controlled','Mimics arm drive mechanics. Keep elbows fixed at sides. Full extension at bottom. No swinging.'),
+    ex('Dumbbell Tricep Overhead Extension','12 reps','Controlled','Both hands on one DB. Extend overhead. Elbows stay close to ears. Full range of motion.'),
+    45,2),
+  ss('Superset 5A+5B · Core Finisher',
+    ex('Renegade Row','8 reps each side','Controlled','Plank holding DBs. Row one DB at a time. Keep hips level — no rotation. Anti-rotation core work.'),
+    ex('Plank with DB Drag','8 reps each side','Steady','In plank, drag one DB across to opposite side. Alternate sides. Core braced against rotation.'),
+    60,3),
+];
+
+// ── BLOCK HTML BUILDERS ───────────────────────────────────────────────────────
+function ssHtml(data){
+  var html='<div class="superset-wrap">';
+  data.forEach(function(item){
+    if(item.type==='label'){
+      html+='<div style="font-size:10px;color:var(--text-3);font-family:\'DM Mono\',monospace;letter-spacing:.1em;text-transform:uppercase;padding:10px 0 4px">'+item.text+'</div>';
+      return;
+    }
+    if(item.type==='finisher'){
+      html+='<div class="superset-pair"><div class="ss-label">FINISHER · STRAIGHT SETS</div><div class="ss-exercises"><div class="ss-exercise"><div class="ss-ex-name">'+item.name+'</div><div class="ss-ex-meta"><span class="ss-tag ss-sets">'+item.sets+' sets</span><span class="ss-tag ss-reps">'+item.reps+'</span></div><div class="ss-note">'+item.note+'</div></div></div></div>';
+      return;
+    }
+    // superset
+    html+='<div class="superset-pair">'+
+      '<div class="ss-label">'+item.label+' &nbsp;·&nbsp; '+item.sets+' ROUNDS</div>'+
+      '<div class="ss-exercises">'+
+      '<div class="ss-exercise">'+
+        '<div class="ss-ex-name">A &nbsp; '+item.exA.name+'</div>'+
+        '<div class="ss-ex-meta"><span class="ss-tag ss-reps">'+item.exA.reps+'</span><span class="ss-tag ss-rest-tag">'+item.exA.tempo+'</span></div>'+
+        '<div class="ss-note">'+item.exA.note+'</div>'+
+      '</div>'+
+      '<div style="border-top:1px dashed var(--border);margin:0 10px"></div>'+
+      '<div class="ss-exercise">'+
+        '<div class="ss-ex-name">B &nbsp; '+item.exB.name+'</div>'+
+        '<div class="ss-ex-meta"><span class="ss-tag ss-reps">'+item.exB.reps+'</span><span class="ss-tag ss-rest-tag">'+item.exB.tempo+'</span></div>'+
+        '<div class="ss-note">'+item.exB.note+'</div>'+
+      '</div>'+
+      '</div>'+
+      '<div class="ss-rest">⏱ Rest '+item.restSec+'s after each round &nbsp;·&nbsp; 15s transition A→B</div>'+
+    '</div>';
+  });
+  html+='</div>';
+  return html;
+}
+
+function runBlkHtml(blocks){
+  return blocks.map(function(b){
+    return '<div class="session-block"><div class="block-label">'+b.l+'</div>'+
+      b.rows.map(function(rw){
+        return '<div class="block-row"><span class="block-icon">'+rw.i+'</span><span>'+rw.t+(rw.p?' <span class="block-pace">'+rw.p+'</span><span class="block-hr">· '+rw.h+'</span>':'')+'</span></div>';
+      }).join('')+'</div>';
+  }).join('');
+}
+
+function sbHtml(key){
+  var st=gSt(key);
+  return '<div class="status-bar"><span class="slabel">mark:</span>'+
+    '<button class="sbtn '+(st==='planned'?'s-planned':'')+'" onclick="doSt(\''+key+'\',\'planned\');event.stopPropagation()">Planned</button>'+
+    '<button class="sbtn '+(st==='done'?'s-done':'')+'" onclick="doSt(\''+key+'\',\'done\');event.stopPropagation()">Done ✓</button>'+
+    '<button class="sbtn '+(st==='skipped'?'s-skipped':'')+'" onclick="doSt(\''+key+'\',\'skipped\');event.stopPropagation()">Skipped</button>'+
+  '</div>';
+}
+
+function kmHtml(key,planned){
+  var act=gKm(key),disp=act!==null?act:planned,isA=act!==null;
+  return '<span class="km-wrap" id="kmw_'+key+'">'+
+    '<span class="'+(isA?'km-actual':'km-val')+'">'+disp+'km'+(isA?' ✓':'')+'</span>'+
+    '<button class="edit-btn" onclick="editKm(\''+key+'\','+planned+');event.stopPropagation()">✎</button>'+
+  '</span>';
+}
+
+// ── WEEK DATA ─────────────────────────────────────────────────────────────────
+// Session types: easy | speed | long | rest | legs | upper | split(run+str) | race
+// For legs/upper days: no run km to track
+// For split: separate run and strength tracking
+
+function mkEasy(nm,km,blocks,tip){return{nm:nm,type:'easy',title:'Easy run '+km+'km',km:km,badge:'Easy',blocks:blocks,tip:tip}}
+function mkSpeed(nm,km,blocks,tip){return{nm:nm,type:'speed',title:'Speed session',km:km,badge:'Speed',blocks:blocks,tip:tip}}
+function mkLong(nm,km,blocks,tip){return{nm:nm,type:'long',title:'Long run '+km+'km',km:km,badge:'Long run',blocks:blocks,tip:tip}}
+function mkRest(nm,tip){return{nm:nm,type:'rest',title:'Rest day',km:0,badge:'Rest',blocks:[blk('Recovery',r('→','Light stretching, foam roll, sleep'),r('→','Hydrate well'))],tip:tip||''}}
+function mkLegs(nm){return{nm:nm,type:'legs',title:'Leg & Core (Supersets)',km:0,badge:'Legs',ssData:THU_LEGS,tip:'Do your easy run first, then this session. Legs warmer = safer on heavy lifts.'}}
+function mkUpper(nm){return{nm:nm,type:'upper',title:'Upper Body (Supersets)',km:0,badge:'Upper',ssData:FRI_UPPER,tip:'Push/pull supersets. A→B with 15s transition, then rest. Improves arm drive and posture for late-race miles.'}}
+function mkSplit(nm,runKm,runBlocks,tip){
+  return{nm:nm,type:'split',title:'Easy '+runKm+'km + Leg & Core',km:runKm,badge:'Split',
+    runKm:runKm,runTitle:'Easy run '+runKm+'km',runBlocks:runBlocks,
+    sTitle:'Leg & Core (Supersets)',ssData:THU_LEGS,tip:tip||''}
+}
+function mkSplitU(nm,runKm,runBlocks,tip){
+  return{nm:nm,type:'splitu',title:'Easy '+runKm+'km + Upper Body',km:runKm,badge:'Split',
+    runKm:runKm,runTitle:'Easy run '+runKm+'km',runBlocks:runBlocks,
+    sTitle:'Upper Body (Supersets)',ssData:FRI_UPPER,tip:tip||''}
+}
+
+var ALL=[];
+
+// ── WEEK 1 ───────────────────────────────────────────────────────────────────
+ALL.push({w:1,km:51,focus:'Settle into structure — adjusted week',days:[
+  mkEasy('Monday',9,[blk('Main run',r('→','9km easy conversational pace'),r('⏱','Pace','6:10 – 6:30/km','HR 125–138 bpm'),r('◎','Full sentences — if breathing hard, slow down')),blk('After',r('→','Hip flexor + calf stretch × 60s each side'))],'First session of 21 weeks. Do not chase pace. Set the right tone.'),
+  mkEasy('Tuesday',8,[blk('Main run',r('→','8km easy'),r('⏱','Pace','6:10 – 6:30/km','HR 125–138 bpm')),blk('Strides × 6',r('→','6 × 100m strides at end of run'),r('⏱','Pace','4:10 – 4:25/km','Controlled, not all-out'),r('◎','Walk 60–90s between each — full recovery'))],'Strides wake up fast-twitch fibres without fatigue. Smooth and quick.'),
+  mkSpeed('Wednesday',11,[blk('Warm-up 2km',r('→','2km easy jog'),r('⏱','Pace','6:30 – 6:45/km','HR <125'),r('◎','Drills: leg swings, high knees × 30m')),blk('Main: 8×600m',r('→','8 reps × 600m'),r('⏱','Interval pace','4:50 – 5:00/km','HR 165–175 bpm'),r('→','90s walk/jog between each rep'),r('◎','First 2 reps controlled — ramp up gradually')),blk('Cool-down 2km',r('→','2km easy'),r('⏱','Pace','6:30 – 7:00/km','HR back to <135'))],'Consistency across all 8 reps — not going out hard and dying late.'),
+  {nm:'Thursday',type:'legs',title:'Easy 8km + Leg & Core',km:8,badge:'Legs',
+   runKm:8,runTitle:'Easy 8km (recovery)',
+   runBlocks:[blk('Recovery run first',r('→','8km easy — do this BEFORE the strength session'),r('⏱','Pace','6:20 – 6:45/km','HR <130'),r('◎','Joints warm from running = safer on leg exercises'))],
+   ssData:THU_LEGS,tip:'Run first, lift second. Easy 8km then straight into the leg supersets.'},
+  {nm:'Friday',type:'upper',title:'Easy 6km + Upper Body',km:6,badge:'Upper',
+   runKm:6,runTitle:'Easy 6km',
+   runBlocks:[blk('Easy run first',r('→','6km easy before upper body session'),r('⏱','Pace','6:20 – 6:40/km','HR <130'))],
+   ssData:FRI_UPPER,tip:'Short easy run then upper body. Upper body won\'t fatigue the legs for Saturday rest.'},
+  mkRest('Saturday','Full rest before Sunday long run. Big carb dinner tonight.'),
+  mkLong('Sunday',18,[blk('Warm-up (first 2km)',r('→','Very easy'),r('⏱','Pace','6:30 – 6:45/km','HR <128')),blk('Main (km 3–18)',r('→','16km steady easy'),r('⏱','Pace','6:10 – 6:20/km','HR 128–140 bpm'),r('◎','Conversational throughout. HR above 145? Slow down.'),r('◎','Drink every 20–25 min. Water only at 18km.')),blk('After',r('→','5 min walk, 10 min stretch'),r('→','Within 30 min: protein + carbs'))],'Most important session of Week 1. Finish feeling like you could have kept going.'),
+]});
+
+// ── WEEK 2 ───────────────────────────────────────────────────────────────────
+ALL.push({w:2,km:57,focus:'Build confidence, add volume',days:[
+  mkEasy('Monday',9,[blk('Main run',r('→','9km easy'),r('⏱','Pace','6:10 – 6:30/km','HR 125–138 bpm'),r('◎','Shake out stiffness from last week'))],'Start fresh. Should feel enjoyable.'),
+  mkEasy('Tuesday',9,[blk('Main + strides',r('→','9km easy + 6×100m strides'),r('⏱','Pace','6:10 – 6:30/km','HR 125–138 bpm'))],''),
+  mkSpeed('Wednesday',11,[blk('Warm-up 2km',r('→','2km easy + drills'),r('⏱','Pace','6:30 – 6:45/km','HR <125')),blk('Main: 6×800m',r('→','6 reps × 800m'),r('⏱','Interval pace','4:50 – 5:00/km','HR 165–175 bpm'),r('→','90s walk/jog recovery')),blk('Cool-down 2km',r('→','2km easy'))],'Consistency across all reps. Not going out hard and dying.'),
+  {nm:'Thursday',type:'legs',title:'Easy 8km + Leg & Core',km:8,badge:'Legs',runKm:8,runTitle:'Easy 8km (recovery)',runBlocks:[blk('Recovery run first',r('→','8km easy before strength'),r('⏱','Pace','6:20 – 6:45/km','HR <130'))],ssData:THU_LEGS,tip:'Run first, then legs session. Do not skip this order.'},
+  {nm:'Friday',type:'upper',title:'Easy 6km + Upper Body',km:6,badge:'Upper',runKm:6,runTitle:'Easy 6km',runBlocks:[blk('Easy run first',r('→','6km easy'),r('⏱','Pace','6:20 – 6:40/km','HR <130'))],ssData:FRI_UPPER,tip:'Session B targets hip stability and running posture.'},
+  mkRest('Saturday','Carb-load dinner tonight for Sunday long run.'),
+  mkLong('Sunday',20,[blk('Warm-up 2km',r('→','2km very easy'),r('⏱','Pace','6:30 – 6:45/km','HR <128')),blk('Main 18km',r('→','18km steady easy'),r('⏱','Pace','6:10 – 6:20/km','HR 128–140 bpm'),r('◎','Drink every 20–25 min')),blk('Post-run',r('→','Stretch + protein + carbs within 30 min'))],'2km more than last week. Same principle: finish comfortable.'),
+]});
+
+// ── WEEK 3 ───────────────────────────────────────────────────────────────────
+ALL.push({w:3,km:55,focus:'Controlled return — 18km long run',days:[
+  mkEasy('Monday',9,[blk('Main run',r('→','9km easy'),r('⏱','Pace','6:10 – 6:30/km','HR 125–138 bpm'))],''),
+  mkEasy('Tuesday',9,[blk('Main + strides',r('→','9km easy + 6×100m strides'),r('⏱','Pace','6:10 – 6:30/km','HR 125–138 bpm'))],''),
+  mkSpeed('Wednesday',10,[blk('Warm-up 2km',r('→','2km easy + drills')),blk('Main: 10×400m',r('→','10 reps × 400m'),r('⏱','Interval pace','4:35 – 4:45/km','HR 170–180 bpm'),r('→','60s full rest between each')),blk('Cool-down 2km',r('→','2km easy'))],'More reps, shorter rest. Stay relaxed in your upper body.'),
+  {nm:'Thursday',type:'legs',title:'Easy 8km + Leg & Core',km:8,badge:'Legs',runKm:8,runTitle:'Easy 8km',runBlocks:[blk('Recovery run',r('→','8km easy'),r('⏱','Pace','6:20 – 6:45/km','HR <130'))],ssData:THU_LEGS,tip:'After 10×400m your legs will feel it. Keep the run easy.'},
+  {nm:'Friday',type:'upper',title:'Easy 6km + Upper Body',km:6,badge:'Upper',runKm:6,runTitle:'Easy 6km',runBlocks:[blk('Easy run',r('→','6km easy'),r('⏱','Pace','6:20 – 6:40/km','HR <130'))],ssData:FRI_UPPER,tip:''},
+  mkRest('Saturday','Big carb dinner tonight. Long run tomorrow — no progression finish, just easy.'),
+  mkLong('Sunday',18,[blk('Warm-up (first 3km)',r('→','First 3km at 6:30–6:45/km'),r('◎','If any waist sensation appears, turn around at 9km')),blk('Main run (km 4–18)',r('→','14km easy, flat route'),r('⏱','Pace','6:10 – 6:20/km','HR 128–140 bpm'),r('◎','No progression, no pace pickups — fully flat and conversational'),r('◎','Drink every 20–25 min')),blk('After',r('→','Stretch + refuel + foam roll. Waist check.'))],'Controlled return after waist injury. No progression finish. 18km and easy the whole way.'),
+]});
+
+// ── WEEK 4 ───────────────────────────────────────────────────────────────────
+ALL.push({w:4,km:62,focus:'Back on track — volume peak Phase 1',days:[
+  mkEasy('Monday',10,[blk('Main run',r('→','10km easy'),r('⏱','Pace','6:10 – 6:30/km','HR 125–138 bpm'))],''),
+  mkEasy('Tuesday',10,[blk('Main + strides',r('→','10km easy + 6×100m strides'),r('⏱','Pace','6:10 – 6:30/km','HR 125–138 bpm'))],''),
+  mkSpeed('Wednesday',11,[blk('Warm-up 2km',r('→','2km easy + drills')),blk('Main: 5×1km',r('→','5 reps × 1km'),r('⏱','Interval pace','4:50 – 5:00/km','HR 165–175 bpm'),r('→','2min jog recovery'),r('◎','Learn how 4:50–5:00/km feels — instinct matters on race day')),blk('Cool-down 2km',r('→','2km easy'))],'1km reps are your primary speed tool. Get comfortable with this pace range.'),
+  {nm:'Thursday',type:'legs',title:'Easy 8km + Leg & Core',km:8,badge:'Legs',runKm:8,runTitle:'Easy 8km',runBlocks:[blk('Recovery run',r('→','8km easy'),r('⏱','Pace','6:20 – 6:45/km','HR <130'))],ssData:THU_LEGS,tip:''},
+  {nm:'Friday',type:'upper',title:'Easy 6km + Upper Body',km:6,badge:'Upper',runKm:6,runTitle:'Easy 6km',runBlocks:[blk('Easy run',r('→','6km easy'),r('⏱','Pace','6:20 – 6:40/km','HR <130'))],ssData:FRI_UPPER,tip:''},
+  mkRest('Saturday','Big carb dinner. First gel practice tomorrow — have one ready.'),
+  mkLong('Sunday',23,[blk('Main long run',r('→','23km steady easy'),r('⏱','Pace','6:10 – 6:20/km','HR 128–140 bpm'),r('◎','Take one gel at km 12 — test gut tolerance'),r('◎','Drink every 20–25 min'))],'First gel practice. Pick Maurten, SiS, or Gu. Better to learn gut tolerance now.'),
+]});
+
+// ── WEEK 5 ── (No down week — week 2 served that purpose)
+ALL.push({w:5,km:58,focus:'Steady build — no down week needed',days:[
+  mkEasy('Monday',9,[blk('Main run',r('→','9km easy'),r('⏱','Pace','6:10 – 6:30/km','HR 125–138 bpm'))],'Week 2 already served as your down week. Keep building.'),
+  mkEasy('Tuesday',9,[blk('Main + strides',r('→','9km easy + 6×100m strides'),r('⏱','Pace','6:10 – 6:30/km','HR 125–138 bpm'))],''),
+  mkSpeed('Wednesday',11,[blk('Warm-up 2km',r('→','2km easy + drills')),blk('Main: 6×1km',r('→','6 reps × 1km'),r('⏱','Interval pace','4:50/km','HR 165–175 bpm'),r('→','90s jog recovery'),r('◎','One more rep than last week — rep 6 will test your resolve')),blk('Cool-down 2km',r('→','2km easy'))],'6 reps. Hold the pace on that final rep.'),
+  {nm:'Thursday',type:'legs',title:'Easy 8km + Leg & Core',km:8,badge:'Legs',runKm:8,runTitle:'Easy 8km',runBlocks:[blk('Recovery run',r('→','8km easy'),r('⏱','Pace','6:20 – 6:45/km','HR <130'))],ssData:THU_LEGS,tip:''},
+  {nm:'Friday',type:'upper',title:'Easy 6km + Upper Body',km:6,badge:'Upper',runKm:6,runTitle:'Easy 6km',runBlocks:[blk('Easy run',r('→','6km easy'),r('⏱','Pace','6:20 – 6:40/km','HR <130'))],ssData:FRI_UPPER,tip:''},
+  mkRest('Saturday','Carb dinner. 22km tomorrow — first time back to pre-injury long run distance.'),
+  mkLong('Sunday',22,[blk('Easy phase (km 1–18)',r('→','18km easy'),r('⏱','Pace','6:10 – 6:20/km','HR 128–140 bpm')),blk('Progression finish (km 19–22)',r('→','Last 4km — gradually pick up pace'),r('⏱','Pace','5:45 – 5:55/km','HR 145–155 bpm'),r('◎','First progression finish — running faster on tired legs')),blk('Post-run',r('→','Full stretch + refuel'))],'Back to 22km. The progression finish is the key new element — your body learning to switch gears on fatigue.'),
+]});
+
+// ── WEEK 6 ───────────────────────────────────────────────────────────────────
+ALL.push({w:6,km:63,focus:'Phase 1 close — tempo feel intro',days:[
+  mkEasy('Monday',9,[blk('Main run',r('→','9km easy'),r('⏱','Pace','6:10 – 6:30/km','HR 125–138 bpm'))],'Phase 1 almost done. You should feel noticeably fitter than Week 1.'),
+  mkEasy('Tuesday',9,[blk('Main + strides',r('→','9km easy + 6×100m strides'),r('⏱','Pace','6:10 – 6:30/km','HR 125–138 bpm'))],''),
+  mkSpeed('Wednesday',11,[blk('Warm-up 2km',r('→','2km easy + drills')),blk('Main: 4×1.5km',r('→','4 reps × 1.5km'),r('⏱','Interval pace','4:50/km','HR 165–175 bpm'),r('→','90s jog recovery'),r('◎','Longer reps — settle into rhythm rather than attacking')),blk('Cool-down 2km',r('→','2km easy'))],'Longer reps introduce sustained speed. Patience in the first 400m of each rep.'),
+  {nm:'Thursday',type:'legs',title:'Easy 8km + Leg & Core',km:8,badge:'Legs',runKm:8,runTitle:'Easy 8km',runBlocks:[blk('Recovery run',r('→','8km easy'),r('⏱','Pace','6:20 – 6:45/km','HR <130'))],ssData:THU_LEGS,tip:'Last Phase 1 leg session. Increase weights if the current load feels easy.'},
+  {nm:'Friday',type:'upper',title:'Easy 6km + Upper Body',km:6,badge:'Upper',runKm:6,runTitle:'Easy 6km',runBlocks:[blk('Easy run',r('→','6km easy'),r('⏱','Pace','6:20 – 6:40/km','HR <130'))],ssData:FRI_UPPER,tip:'Last Phase 1 upper session.'},
+  mkRest('Saturday','Big carb dinner. 24km with tempo finish tomorrow.'),
+  mkLong('Sunday',24,[blk('Easy phase (km 1–21)',r('→','21km easy'),r('⏱','Pace','6:10 – 6:20/km','HR 128–140 bpm')),blk('Tempo finish (km 22–24)',r('→','Last 3km at stronger effort'),r('⏱','Pace','5:40 – 5:50/km','HR 148–158 bpm')),blk('Post-run',r('→','Full stretch + refuel. Phase 1 complete!'))],'Phase 1 closes here. 6 weeks, strong base. You\'re ready for Phase 2.'),
+]});
+
+// ── WEEKS 7–21 GENERATED ──────────────────────────────────────────────────────
+var TMPL={
+  7:{km:66,focus:'Marathon pace introduced',lk:25,sp:'5×1km @ 4:45–4:55/km · 2min rest',mpNote:' · last 5km @ 5:30/km'},
+  8:{km:68,focus:'Cruise intervals begin',lk:26,sp:'4×1.5km @ 4:50/km · 90s rest',mpNote:' · last 8km @ 5:25/km'},
+  9:{km:62,focus:'Down week — recover and adapt',lk:20,sp:'8×600m @ 4:50/km (lighter)',mpNote:''},
+  10:{km:70,focus:'Long run to 28km',lk:28,sp:'3×2km @ 4:50/km · 2min rest',mpNote:' · last 10km @ 5:25/km'},
+  11:{km:72,focus:'Medium long runs added',lk:28,sp:'5×1km @ 4:45/km · 90s rest',mpNote:' · progressive'},
+  12:{km:62,focus:'Down week before peak',lk:22,sp:'6×800m @ 4:50/km · 90s rest',mpNote:''},
+  13:{km:74,focus:'Phase 2 peak',lk:30,sp:'4×1.5km @ 4:48/km · 90s rest',mpNote:' · last 12km @ 5:25/km'},
+  14:{km:72,focus:'Race-specific pace — MP work begins',lk:28,sp:'3×3km @ 5:19/km (goal MP) · 90s rest',mpNote:' · 15km @ 5:19/km (goal MP)'},
+  15:{km:68,focus:'Tune-up half marathon week',lk:0,sp:'6×1km @ 4:50/km · 90s rest',mpNote:''},
+  16:{km:78,focus:'Peak volume week',lk:32,sp:'3×3km @ 5:19/km + 1km fast finish',mpNote:' · 20km @ 5:19/km · gel every 35min'},
+  17:{km:72,focus:'Fueling mastery',lk:30,sp:'4×2km @ 5:10/km · 2min rest',mpNote:' · 18km @ 5:19/km · gel practice'},
+  18:{km:60,focus:'Final quality, taper entry',lk:26,sp:'3×2km @ 5:10/km · 2min rest',mpNote:' · 12km @ 5:19/km · gel practice'},
+  19:{km:52,focus:'Taper — protect the legs',lk:22,sp:'6×800m @ 4:50/km · 90s rest',mpNote:''},
+  20:{km:38,focus:'Deep taper — stay sharp',lk:16,sp:'6×400m @ 4:40/km · full rest',mpNote:''},
+  21:{km:14,focus:'Race week — trust the work',lk:0,sp:'—',mpNote:''}
+};
+
+for(var w=7;w<=21;w++){
+  (function(w){
+    var t=TMPL[w],isR=w===21,hasHM=w===15,isTap=w>=19;
+    var strL=w%2===0?'B':'A';
+    var sun=isR?mkRest('Sunday','You did it. Celebrate. Rest. Eat. Sydney Marathon done.'):
+      hasHM?{nm:'Sunday',type:'race',title:'Half Marathon Race',km:21.1,badge:'Race',blocks:[blk('HM Race',r('→','Target sub-1:40 · race-day fueling practice'),r('⏱','Target pace','4:44/km','HR 160–172 bpm'),r('◎','Treat as full dress rehearsal — gels, pacing, hydration'))],tip:'Sub-1:40 = on track for sub-3:45. Your fitness checkpoint.'}:
+      mkLong('Sunday',t.lk,[blk('Long run',r('→',t.lk+'km'+t.mpNote),r('⏱','Pace','6:00 – 6:20/km','HR 128–150 bpm'),r('◎',w>=14?'Gel every 35min from km 10. Exactly as race day.':'Drink every 20–25 min'))],
+        w>=16?'Biggest long run of the plan. Nail the fueling strategy.':w>=14?'Practice exact race-day fueling strategy — no surprises on Aug 30.':'');
+    var fri=isTap?
+      mkEasy('Friday',4,[blk('Shakeout',r('→','4km very easy — just moving'),r('⏱','Pace','6:20 – 6:40/km','HR <125'))],''):
+      {nm:'Friday',type:'upper',title:'Easy 6km + Upper Body',km:6,badge:'Upper',runKm:6,runTitle:'Easy 6km',runBlocks:[blk('Easy run',r('→','6km easy'),r('⏱','Pace','6:20 – 6:40/km','HR <130'))],ssData:FRI_UPPER,tip:w>=17?'Maintenance — lighter weights this phase.':''};
+    ALL.push({w:w,km:t.km,focus:t.focus,days:[
+      mkEasy('Monday',isTap?6:10,[blk('Main run',r('→',isTap?'Short shakeout — keep legs fresh':'10km easy'),r('⏱','Pace','6:10 – 6:30/km','HR 125–138 bpm'))],''),
+      mkEasy('Tuesday',w>=11&&w<=18?14:9,[blk('Main run',r('→',w>=11&&w<=18?'14km — last 4–5km at or near MP 5:19/km':'9km easy + 6×100m strides'),r('⏱','Pace',w>=11&&w<=18?'6:10 – 6:20/km':'6:10 – 6:30/km','HR 128–145 bpm'))],''),
+      isR?mkRest('Wednesday','Full rest — 3 days to race.'):mkSpeed('Wednesday',10,[blk('Speed work',r('→',t.sp))],w>=14?'Race-specific effort. This pace should start feeling familiar.':''),
+      {nm:'Thursday',type:'legs',title:(isTap?'Easy run':'Easy 8km')+' + Leg & Core',km:isTap?6:8,badge:'Legs',runKm:isTap?6:8,runTitle:isTap?'Easy 6km':'Easy 8km',runBlocks:[blk('Recovery run',r('→',(isTap?'6':'8')+'km easy'),r('⏱','Pace','6:20 – 6:45/km','HR <130'))],ssData:THU_LEGS,tip:w>=19?'Lighter weights in taper — maintenance only.':w>=17?'Keep weights moderate — protecting legs for peak long runs.':''},
+      fri,
+      isR?{nm:'Saturday',type:'race',title:'RACE DAY — Sydney Marathon',km:42.2,badge:'Race',blocks:[blk('Race Day',r('→','Goal: Sub-3:45 · Pace: 5:19/km'),r('→','Gel every 35min from km 10 · water at every station'),r('◎','First half conservative. The race starts at km 30.'))],tip:'Trust 21 weeks of work. You\'re ready.'}:mkRest('Saturday',w===20?'Carb load tonight. Last big rest before race week.':'Full rest. Big carb dinner if long run tomorrow.'),
+      sun
+    ]});
+  })(w);
+}
+
+// ── SIDEBAR BUILD ─────────────────────────────────────────────────────────────
+function buildSidebar(){
+  var sb=document.getElementById('sidebar');
+  var html='<div class="sidebar-section">Training Plan</div>';
+  var lastPh=-1;
+  ALL.forEach(function(wk,i){
+    var ph=gPh(wk.w);var phIdx=PH.indexOf(ph);
+    if(phIdx!==lastPh){
+      html+='<div class="phase-group"><div class="phase-label" style="color:'+ph.color+'">'+ph.name+'</div>';
+      lastPh=phIdx;
+    }
+    var d0=new Date('2026-04-06');d0.setDate(d0.getDate()+i*7);
+    var d1=new Date('2026-04-06');d1.setDate(d1.getDate()+i*7+6);
+    var lbl=MO[d0.getMonth()]+' '+d0.getDate()+'–'+d1.getDate();
+    html+='<button class="week-btn" id="wbtn_'+i+'" onclick="renderWeek('+i+')"><span class="wnum">W'+wk.w+'</span>'+lbl+'<span class="wkm">'+wk.km+'k</span></button>';
+  });
+  sb.innerHTML=html;
+}
+
+// ── META UPDATE ───────────────────────────────────────────────────────────────
+function upMeta(wi){
+  var wk=ALL[wi],total=0,done=0,dkm=0;
+  wk.days.forEach(function(s,oi){
+    var k=wi+'_'+oi;
+    if(s.type==='rest')return;
+    var isSplit=s.type==='split'||s.type==='splitu';
+    var isLegs=s.type==='legs'||s.type==='upper';
+    if(isSplit){
+      total+=2;
+      if(gSt(k+'_str')==='done')done++;
+      if(gSt(k+'_run')==='done'){done++;dkm+=gKm(k+'_run')!==null?gKm(k+'_run'):s.runKm;}
+    } else if(isLegs){
+      total+=2;// run + strength
+      if(gSt(k+'_run')==='done'){done++;dkm+=gKm(k+'_run')!==null?gKm(k+'_run'):s.runKm;}
+      if(gSt(k+'_str')==='done')done++;
+    } else {
+      total++;
+      if(gSt(k)==='done'){done++;dkm+=gKm(k)!==null?gKm(k):s.km;}
+    }
+  });
+  document.getElementById('mKm').textContent='~'+wk.km+'km';
+  document.getElementById('mDone').textContent=Math.round(dkm*10)/10+' km logged';
+  document.getElementById('mSess').textContent=total;
+  document.getElementById('mSessD').textContent=done+' done';
+  var pct=total>0?Math.round(done/total*100):0;
+  document.getElementById('pPct').textContent=pct+'%';
+  document.getElementById('pFill').style.width=pct+'%';
+  var ord=gOr(wi),li=-1,si=-1;
+  for(var i=0;i<ord.length;i++){if(wk.days[ord[i]]&&wk.days[ord[i]].type==='long')li=ord[i];if(wk.days[ord[i]]&&wk.days[ord[i]].type==='speed')si=ord[i];}
+  var ls=li>=0?wk.days[li]:null,ss=si>=0?wk.days[si]:null;
+  document.getElementById('mLong').textContent=ls?ls.km+'km':'—';
+  document.getElementById('mLongD').textContent=ls?ls.nm:'—';
+  document.getElementById('mSpd').textContent=ss?ss.title.replace('Speed session',''):wk.w===15?'HM Race':'—';
+}
+
+// ── MAIN RENDER ───────────────────────────────────────────────────────────────
+var CW=0,DS=null,DW=null;
+
+function renderWeek(wi){
+  CW=wi;
+  var wk=ALL[wi],ph=gPh(wk.w);
+  // sidebar highlight
+  document.querySelectorAll('.week-btn').forEach(function(b){b.classList.remove('active')});
+  var wb=document.getElementById('wbtn_'+wi);if(wb)wb.classList.add('active');
+  // header
+  var d0=new Date('2026-04-06');d0.setDate(d0.getDate()+wi*7);
+  var d6=new Date('2026-04-06');d6.setDate(d6.getDate()+wi*7+6);
+  document.getElementById('hWeekNum').textContent='Week '+wk.w;
+  document.getElementById('hWeekDates').textContent=DN[0]+' '+d0.getDate()+' '+MO[d0.getMonth()]+' – '+DN[6]+' '+d6.getDate()+' '+MO[d6.getMonth()];
+  document.getElementById('hFocus').textContent=wk.focus;
+  document.getElementById('hPill').innerHTML='<span class="phase-pill" style="background:'+ph.bg+';color:'+ph.color+'">'+ph.name+'  ·  Week '+wk.w+' of 21</span>';
+  var ord=gOr(wi);
+  var grid=document.getElementById('daysGrid');
+  grid.innerHTML='';
+  ord.forEach(function(oi,slotIdx){
+    var s=wk.days[oi];if(!s)return;
+    var k=wi+'_'+oi;
+    var isLegs=s.type==='legs'||s.type==='upper';
+    var isSplit=s.type==='split'||s.type==='splitu';
+    var dt=s.type;
+    // done class
+    var allDone=false;
+    if(isLegs){allDone=gSt(k+'_run')==='done'&&gSt(k+'_str')==='done';}
+    else if(isSplit){allDone=gSt(k+'_run')==='done'&&gSt(k+'_str')==='done';}
+    else{allDone=gSt(k)==='done';}
+
+    var card=document.createElement('div');
+    card.className='day-card'+(allDone?' is-done':'');
+    card.id='dc_'+slotIdx;card.draggable=true;
+    card.addEventListener('dragstart',function(e){DS=slotIdx;DW=wi;e.dataTransfer.effectAllowed='move';card.style.opacity='.4';});
+    card.addEventListener('dragend',function(){card.style.opacity='';document.querySelectorAll('.day-card').forEach(function(c){c.classList.remove('drag-over')});DS=null;DW=null;});
+    card.addEventListener('dragover',function(e){if(DW===wi){e.preventDefault();document.querySelectorAll('.day-card').forEach(function(c){c.classList.remove('drag-over')});card.classList.add('drag-over');}});
+    card.addEventListener('dragleave',function(){card.classList.remove('drag-over');});
+    card.addEventListener('drop',function(e){
+      e.preventDefault();card.classList.remove('drag-over');
+      if(DW===wi&&DS!==null&&DS!==slotIdx){var o=gOr(wi);var tmp=o[DS];o[DS]=o[slotIdx];o[slotIdx]=tmp;sOr(wi,o);OR[wi]=o;renderWeek(wi);}
+    });
+
+    // body content
+    var body='';
+    if(isLegs){
+      body='<div class="sub-section">'+
+        '<div class="sub-header"><span class="sub-dot d-easy"></span><span class="sub-title">'+s.runTitle+'</span><span class="sub-badge b-easy">Easy Run</span>'+kmHtml(k+'_run',s.runKm)+'</div>'+
+        runBlkHtml(s.runBlocks)+sbHtml(k+'_run')+
+      '</div>'+
+      '<div class="sub-section">'+
+        '<div class="sub-header"><span class="sub-dot d-'+dt+'"></span><span class="sub-title">'+s.title.replace(s.runTitle+' + ','')+'</span><span class="sub-badge b-'+dt+'">'+s.badge+'</span></div>'+
+        ssHtml(s.ssData)+sbHtml(k+'_str')+
+      '</div>'+
+      (s.tip?'<div class="tip-box">'+s.tip+'</div>':'');
+    } else if(isSplit){
+      body='<div class="sub-section">'+
+        '<div class="sub-header"><span class="sub-dot d-easy"></span><span class="sub-title">'+s.runTitle+'</span><span class="sub-badge b-easy">Easy Run</span>'+kmHtml(k+'_run',s.runKm)+'</div>'+
+        runBlkHtml(s.runBlocks)+sbHtml(k+'_run')+
+      '</div>'+
+      '<div class="sub-section">'+
+        '<div class="sub-header"><span class="sub-dot d-'+(s.type==='splitu'?'upper':'strength')+'"></span><span class="sub-title">'+s.sTitle+'</span><span class="sub-badge b-'+(s.type==='splitu'?'upper':'strength')+'">'+(s.type==='splitu'?'Upper':'Legs')+'</span></div>'+
+        ssHtml(s.ssData)+sbHtml(k+'_str')+
+      '</div>'+
+      (s.tip?'<div class="tip-box">'+s.tip+'</div>':'');
+    } else {
+      body=runBlkHtml(s.blocks||[])+(s.tip?'<div class="tip-box">'+s.tip+'</div>':'')+(s.type!=='rest'?sbHtml(k):'');
+    }
+
+    // header km display
+    var kmDisp='';
+    if(s.type==='rest')kmDisp='';
+    else if(isLegs||isSplit)kmDisp=kmHtml(k+'_run',s.runKm);
+    else if(s.km>0)kmDisp=kmHtml(k,s.km);
+
+    card.innerHTML=
+      '<div class="day-header" onclick="tog(\'db_'+slotIdx+'\',\'dc_'+slotIdx+'ch\')">'+
+        '<span class="drag-handle" onclick="event.stopPropagation()">⠿</span>'+
+        '<div class="day-dot d-'+dt+'"></div>'+
+        '<span class="day-date">'+sd(wi,slotIdx)+'</span>'+
+        '<span class="day-title">'+s.title+'</span>'+
+        '<span class="day-badge b-'+dt+'">'+s.badge+'</span>'+
+        kmDisp+
+        '<span class="day-chev" id="dc_'+slotIdx+'ch">▼</span>'+
+      '</div>'+
+      '<div class="day-body" id="db_'+slotIdx+'">'+body+'</div>';
+    grid.appendChild(card);
+  });
+  upMeta(wi);
+}
+
+window.tog=function(bid,cid){
+  var b=document.getElementById(bid),c=document.getElementById(cid);
+  if(!b)return;var op=b.classList.toggle('open');if(c)c.style.transform=op?'rotate(180deg)':'';
+};
+window.doSt=function(k,v){sSt(k,v);upMeta(CW);
+  // refresh button states
+  ['planned','done','skipped'].forEach(function(s){
+    document.querySelectorAll('.sbtn').forEach(function(btn){
+      if(btn.getAttribute('onclick')&&btn.getAttribute('onclick').indexOf("'"+k+"'")>-1){
+        var match=btn.getAttribute('onclick').indexOf("'"+s+"'")>-1;
+        btn.className='sbtn'+(match&&s===v?' s-'+s:'');
+      }
+    });
+  });
+  // re-render to update card opacity and button states cleanly
+  renderWeek(CW);
+};
+window.editKm=function(k,planned){
+  var wrap=document.getElementById('kmw_'+k);if(!wrap)return;
+  var cur=gKm(k)!==null?gKm(k):planned;
+  wrap.innerHTML='<input class="km-input" id="kmi_'+k+'" type="number" step="0.1" min="0" max="60" value="'+cur+'">'+
+    '<button class="edit-btn" onclick="saveKm(\''+k+'\','+planned+');event.stopPropagation()">✓</button>'+
+    '<button class="edit-btn" onclick="cancelKm(\''+k+'\','+planned+');event.stopPropagation()">✗</button>';
+  var inp=document.getElementById('kmi_'+k);
+  if(inp){inp.focus();inp.select();inp.addEventListener('keydown',function(e){if(e.key==='Enter')saveKm(k,planned);if(e.key==='Escape')cancelKm(k,planned);});}
+};
+window.saveKm=function(k,planned){
+  var inp=document.getElementById('kmi_'+k);
+  if(inp){var v=parseFloat(inp.value);if(!isNaN(v)&&v>=0)sKm(k,Math.round(v*10)/10);}
+  refreshKm(k,planned);upMeta(CW);
+};
+window.cancelKm=function(k,planned){refreshKm(k,planned);};
+function refreshKm(k,planned){
+  var wrap=document.getElementById('kmw_'+k);if(!wrap)return;
+  var act=gKm(k),disp=act!==null?act:planned,isA=act!==null;
+  wrap.innerHTML='<span class="'+(isA?'km-actual':'km-val')+'">'+disp+'km'+(isA?' ✓':'')+'</span>'+
+    '<button class="edit-btn" onclick="editKm(\''+k+'\','+planned+');event.stopPropagation()">✎</button>';
+}
+
+buildSidebar();
+renderWeek(0);
+</script>
+</body>
+</html>
